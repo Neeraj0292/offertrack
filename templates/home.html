@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Home - Dark Mode</title>
+<style>
+/* Base Styles */
+html, body {margin:0;padding:0;font-family:Arial,sans-serif;height:100%;background:#121212;color:#E0E0E0;overflow-x:hidden;}
+header{display:flex;justify-content:space-between;align-items:center;padding:15px 25px;background:#1F1F1F;box-shadow:0 2px 5px rgba(0,0,0,0.5);position:relative;z-index:900;}
+header .logo{font-weight:bold;font-size:1.2rem;}
+nav{display:flex;gap:20px;}
+nav a{cursor:pointer;color:#E0E0E0;text-decoration:none;font-weight:bold;padding-bottom:3px;transition:color 0.3s ease,border-bottom 0.3s ease;}
+nav a.active{border-bottom:2px solid #FFD600;color:#FFD600;}
+nav a:hover{color:#FFD600;}
+.hamburger{display:none;cursor:pointer;flex-direction:column;gap:5px;}
+.hamburger div{width:25px;height:3px;background-color:#E0E0E0;transition:0.3s;}
+.sidebar{position:fixed;top:0;left:0;transform:translateX(-100%);width:250px;height:100%;background:#1F1F1F;padding:20px;display:flex;flex-direction:column;gap:15px;transition:transform 0.3s ease;z-index:1000;}
+.sidebar a{color:#E0E0E0;text-decoration:none;font-weight:bold;font-size:1.1rem;}
+.sidebar a.active{color:#FFD600;}
+.sidebar .close-btn{align-self:flex-end;font-size:1.5rem;cursor:pointer;color:#FFD600;display:none;}
+.sidebar.open{transform:translateX(0);}
+.content{flex:1;display:flex;justify-content:center;align-items:flex-start;padding:15px;animation:fadeIn 0.5s ease;box-sizing:border-box;min-height:calc(100vh - 70px);}
+.card{background:#1E1E1E;padding:20px;border-radius:15px;text-align:center;max-width:600px;width:100%;box-shadow:0 4px 20px rgba(0,0,0,0.5);animation:popIn 0.3s ease;color:#E0E0E0;box-sizing:border-box;}
+.offers-list{display:grid;grid-template-columns:1fr 1fr;gap:15px;margin-top:15px;}
+.offer-card{background:#2A2A2A;padding:15px;border-radius:10px;text-align:left;transition:0.3s ease;}
+.offer-card:hover{transform:scale(1.03);background:#333333;}
+.offer-card button{margin-top:10px;background:#FFD600;color:#121212;border:none;padding:8px 12px;border-radius:8px;cursor:pointer;font-weight:bold;width:100%;}
+.offer-card button:hover{background:#FFC107;}
+.payout-section{display:flex;flex-direction:column;gap:15px;align-items:center;}
+.payout-amount{font-size:2rem;font-weight:bold;background:#2A2A2A;padding:15px 30px;border-radius:12px;color:#FFD600;width:100%;box-sizing:border-box;}
+.withdraw-btn{background:#FFD600;color:#121212;border:none;padding:10px 15px;border-radius:10px;cursor:pointer;font-weight:bold;transition:0.3s ease;width:100%;}
+.withdraw-btn:hover{background:#FFC107;transform:scale(1.05);}
+.logout-btn {
+    margin-top: 20px;
+    background: #FF3B3B;
+    color: #fff;
+    border: none;
+    padding: 10px 15px;
+}
+.logout-btn:hover {
+    background: #FF5252;
+    transform: scale(1.05);
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes popIn {
+    from { transform: scale(0.9); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+
+@media screen and (max-width: 768px) {
+    nav { display: none; }
+    .hamburger { display: flex; }
+    .sidebar .close-btn { display: block; }
+}
+
+</style>
+</head>
+<body>
+
+<header>
+    <div class="logo">Welcome, {{ user.name }} 👋</div>
+    <nav>
+        <a class="active" onclick="showSection('dashboard', this)">Dashboard</a>
+        <a onclick="showSection('offers', this)">Offers</a>
+        <a onclick="showSection('payout', this)">Payout</a>
+        <a onclick="showSection('settings', this)">Settings</a>
+    </nav>
+    <div class="hamburger" onclick="openSidebar()">
+        <div></div><div></div><div></div>
+    </div>
+</header>
+
+<div class="sidebar" id="sidebar">
+    <div class="close-btn" onclick="closeSidebar()">×</div>
+    <a class="active" onclick="showSection('dashboard', this);closeSidebar()">Dashboard</a>
+    <a onclick="showSection('offers', this);closeSidebar()">Offers</a>
+    <a onclick="showSection('payout', this);closeSidebar()">Payout</a>
+    <a onclick="showSection('settings', this);closeSidebar()">Settings</a>
+</div>
+
+<div class="content" id="content">
+    <div class="card">
+        <h2>📊 Dashboard</h2>
+        <p>Overview of your account activity and quick stats.</p>
+    </div>
+</div>
+
+<script>
+function showSection(section, el){
+    document.querySelectorAll('nav a, .sidebar a').forEach(a=>a.classList.remove('active'));
+    el.classList.add('active');
+
+    const content=document.getElementById("content");
+    content.innerHTML="";let html="";
+    if(section==="dashboard"){
+        html=`<div class="card"><h2>📊 Dashboard</h2><p>Overview of your account activity and quick stats.</p></div>`;
+    } else if(section==="offers"){
+        html=`<div class="card"><h2>🎯 Offers</h2><div class="offers-list">
+        {% for offer in user.offers %}
+            <div class="offer-card">
+                <h3>{{ offer.title }}</h3>
+                <p>{{ offer.description }}</p>
+                <a href="{{ offer.link }}"><button>Get Offer</button></a>
+            </div>
+        {% endfor %}
+        </div></div>`;
+    } else if(section==="payout"){
+        html=`<div class="card"><h2>💰 Payout</h2>
+        <div class="payout-section">
+            <div class="payout-amount">$50.00</div>
+            <button class="withdraw-btn">Withdraw</button>
+        </div></div>`;
+    } else if(section==="settings"){
+        html=`<div class="card"><h2>⚙️ Settings</h2><p>Change your password or account preferences here.</p>
+        <form action="/logout" method="get">
+            <button type="submit" class="logout-btn">Logout</button>
+        </form></div>`;
+    }
+    content.innerHTML=html;
+}
+
+function openSidebar(){document.getElementById("sidebar").classList.add("open");}
+function closeSidebar(){document.getElementById("sidebar").classList.remove("open");}
+</script>
+
+</body>
+</html>
