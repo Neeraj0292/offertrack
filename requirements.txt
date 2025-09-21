@@ -1,2 +1,4 @@
+
 flask==2.3.4
-ploomber==0.26.0
+gunicorn==20.1.0
+
